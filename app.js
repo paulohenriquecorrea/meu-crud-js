@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+let logado = false;
 
 const crypto = require('crypto');
 
@@ -29,6 +30,9 @@ app.use(bodyParser.json());
 // rota para exibir o formulário de cadastro
 
 app.get('/register', (req, res) => {
+  if (!logado) {
+    res.send('Favor, realize o login para continuar');
+  }
   res.sendFile(path.join(__dirname, './views/form.html'));
 });
 
@@ -65,6 +69,7 @@ app.post('/login', (req, res) => {
       return res.status(401).send('User not found');
     }
 
+    logado = true;
     return res.send('Logado');
   });
 });
