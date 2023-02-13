@@ -1,34 +1,19 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-let logado = false;
+const UserController = require('../controllers/UserController');
 
-const crypto = require('crypto');
+global.logado = false;
 
 // inicialize o aplicativo Express
 const app = express();
-
-// Importa o model User
-const User = require('../models/user');
-
-// inicializa o modelo de usuário
-const sequelize = require('../config/sequelize');
-sequelize.sync();
-
-const criaHash = (password) => {
-  const hashedPassword = crypto
-    .createHash('sha256')
-    .update(password)
-    .digest('hex');
-
-  return hashedPassword;
-};
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// rota para exibir o formulário de cadastro
+const sequelize = require('../config/sequelize');
+sequelize.sync();
 
+// rota para exibir o formulário de cadastro
 app.get('/register', (req, res) => {
   if (!logado) {
     return res.sendFile(path.join(__dirname, '../views/erroLogin.html'));
@@ -41,38 +26,10 @@ app.get('/login', (req, res) => {
 });
 
 // rota para processar o formulário de cadastro
-app.post('/register', (req, res) => {
-  const { name, password } = req.body;
-  const hashedPassword = criaHash(password);
-  User.create({
-    username: name,
-    password: hashedPassword,
-  })
-    .then((user) => {
-      res.send(`Obrigado por se registrar, ${name}!`);
-    })
-    .catch((error) => {
-      res.send(`Erro ao processar o formulário: ${error}`);
-    });
-});
+app.post('/register', UserController.cadastra);
 
-app.post('/login', (req, res) => {
-  const { name, password } = req.body;
-  const hashedPassword = criaHash(password);
-  User.findOne({
-    where: {
-      username: name,
-      password: hashedPassword,
-    },
-  }).then((user) => {
-    if (!user) {
-      return res.status(401).send('User not found');
-    }
-
-    logado = true;
-    return res.sendFile(path.join(__dirname, '../views/menu.html'));
-  });
-});
+//rota tela login
+app.post('/login', UserController.busca);
 
 // inicialize o servidor
 app.listen(3000, () => {
