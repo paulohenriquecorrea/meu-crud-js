@@ -9,10 +9,10 @@ const crypto = require('crypto');
 const app = express();
 
 // Importa o model User
-const User = require('./models/user');
+const User = require('../models/user');
 
 // inicializa o modelo de usuário
-const sequelize = require('./config/sequelize');
+const sequelize = require('../config/sequelize');
 sequelize.sync();
 
 const criaHash = (password) => {
@@ -31,13 +31,13 @@ app.use(bodyParser.json());
 
 app.get('/register', (req, res) => {
   if (!logado) {
-    res.send('Favor, realize o login para continuar');
+    return res.sendFile(path.join(__dirname, '../views/erroLogin.html'));
   }
-  res.sendFile(path.join(__dirname, './views/form.html'));
+  return res.sendFile(path.join(__dirname, '../views/form.html'));
 });
 
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, './views/login.html'));
+  res.sendFile(path.join(__dirname, '../views/login.html'));
 });
 
 // rota para processar o formulário de cadastro
@@ -70,7 +70,7 @@ app.post('/login', (req, res) => {
     }
 
     logado = true;
-    return res.send('Logado');
+    return res.sendFile(path.join(__dirname, '../views/menu.html'));
   });
 });
 
